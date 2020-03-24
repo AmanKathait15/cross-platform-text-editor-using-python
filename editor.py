@@ -133,6 +133,23 @@ text_editor.config(yscrollcommand = scroll_bar.set)
 status_bar = ttk.Label(main_application, text = 'status bar')
 status_bar.pack(side = tk.BOTTOM)
 
+#### adding status bar functionality ####
+
+def text_modified(event = None):
+
+	if(text_editor.edit_modified()):
+
+		text = text_editor.get(1.0,'end-1c')		## end-1c mean exluding 1 character i.e '\n'
+		no_of_char = len(text)
+		words = text.split()
+		no_of_words = len(words)
+
+		status_bar.config(text = f'no of character : {no_of_char} no of words : {no_of_words}')
+
+	text_editor.edit_modified(False) 	# to change status bar when text is modified
+
+text_editor.bind('<<Modified>>',text_modified)
+
 ### font box ###
 
 fonts = tk.font.families()
@@ -251,16 +268,99 @@ def change_to_underline():
 
 underline_button.configure(command = change_to_underline)
 
+### font color ###
+
+def change_font_color():
+
+	color_var = tk.colorchooser.askcolor()
+	text_editor.configure(fg = color_var[1]) 	## 0 index for RGB and 1 for hexcode
+
+font_color_button.configure(command = change_font_color)
+
+### adding alignment functionality ###
+
+def left_align():
+
+	text_content = text_editor.get(1.0,'end')
+	text_editor.tag_config('left',justify = tk.LEFT)
+	text_editor.delete(1.0,'end')
+	text_editor.insert(tk.INSERT , text_content , 'left')
+
+left_align_button.configure(command = left_align)
+
+def center_align():
+
+	text_content = text_editor.get(1.0,'end')
+	text_editor.tag_config('center',justify = tk.CENTER)
+	text_editor.delete(1.0,'end')
+	text_editor.insert(tk.INSERT , text_content , 'center')
+
+center_align_button.configure(command = center_align)
+
+def right_align():
+
+	text_content = text_editor.get(1.0,'end')
+	text_editor.tag_config('right',justify = tk.RIGHT)
+	text_editor.delete(1.0,'end')
+	text_editor.insert(tk.INSERT , text_content , 'right')
+
+right_align_button.configure(command = right_align)
+
 text_editor.config(font = (current_font,current_font_size))
 
 # to add drop down menu in file section
 
 # compound is used so that label and icon not overlap with each other
 
-file.add_command(label = 'New', image = new_icon ,compound = tk.LEFT , accelerator = 'Ctrl+n')
-file.add_command(label = 'Open', image = open_icon , compound = tk.LEFT , accelerator = 'Ctrl+o')
-file.add_command(label = 'Save', image = save_icon , compound = tk.LEFT , accelerator = 'Ctrl+s')
-file.add_command(label = 'Save_as', image = save_as_icon , compound = tk.LEFT , accelerator = 'Ctrl+ALT+s')
+url = ''
+
+def new_file(event = None):
+	global url
+	url = ''
+	text_editor.delete(1.0,tk.END)
+
+def open_file(event = None):
+	global url
+	url = filedialog.askopenfilename(initialdir = os.getcwd(), title='select file', filetypes = (('Text File','*.txt'),('All Files','*.*')))
+	try:
+		with open(url,'r') as fr:
+			text_editor.delete(1.0,tk.END)
+			text_editor.insert(1.0,fr.read())
+	except FileNotFoundError:
+		return
+	except:
+		return
+	main_application.title(os.path.basename(url))
+
+def save_file(event = None):
+	global url
+	try:
+		if url:
+			content = str(text_editor.get(1.0,tk.END))
+			with open(url , 'w', encoding='utf-8') as fw:
+				fw.write(content)
+		else:
+			url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
+			content = text_editor.get(1.0,tk.END)
+			url.write(content)
+			url.close()
+	except:
+		return
+
+def save_file_as(event = None):
+	global url
+	try:
+		url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
+		content = text_editor.get(1.0,tk.END)
+		url.write(content)
+		url.close()
+	except:
+		return
+
+file.add_command(label = 'New', image = new_icon ,compound = tk.LEFT , accelerator = 'Ctrl+n' , command = new_file)
+file.add_command(label = 'Open', image = open_icon , compound = tk.LEFT , accelerator = 'Ctrl+o' , command = open_file)
+file.add_command(label = 'Save', image = save_icon , compound = tk.LEFT , accelerator = 'Ctrl+s' , command = save_file)
+file.add_command(label = 'Save_as', image = save_as_icon , compound = tk.LEFT , accelerator = 'Ctrl+ALT+s', command = save_file_as)
 file.add_command(label = 'Exit', image = exit_icon , compound = tk.LEFT , accelerator = 'Ctrl+q')
 
 # to add drop down menu in edit section
