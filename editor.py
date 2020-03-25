@@ -58,6 +58,7 @@ light_icon_path = '/home/aman/Desktop/text editor/icons2/light_default.png'
 light_plus_icon_path = '/home/aman/Desktop/text editor/icons2/light_plus.png'
 dark_icon_path = '/home/aman/Desktop/text editor/icons2/dark.png'
 monokai_icon_path = '/home/aman/Desktop/text editor/icons2/monokai.png'
+red_icon_path = '/home/aman/Desktop/text editor/icons2/red.png'
 night_blue_icon_path = '/home/aman/Desktop/text editor/icons2/night_blue.png'
 
 ############### button icon ##############
@@ -98,6 +99,7 @@ status_bar_icon = tk.PhotoImage(file = status_bar_icon_path)
 light_icon = tk.PhotoImage(file = light_icon_path)
 light_plus_icon = tk.PhotoImage(file = light_plus_icon_path)
 dark_icon = tk.PhotoImage(file = dark_icon_path)
+red_icon = tk.PhotoImage(file = red_icon_path)
 monokai_icon = tk.PhotoImage(file = monokai_icon_path)
 night_blue_icon = tk.PhotoImage(file = night_blue_icon_path)
 
@@ -135,10 +137,14 @@ status_bar.pack(side = tk.BOTTOM)
 
 #### adding status bar functionality ####
 
+text_change = 0
+
 def text_modified(event = None):
 
 	if(text_editor.edit_modified()):
 
+		global text_change 
+		text_change = 1
 		text = text_editor.get(1.0,'end-1c')		## end-1c mean exluding 1 character i.e '\n'
 		no_of_char = len(text)
 		words = text.split()
@@ -315,12 +321,28 @@ text_editor.config(font = (current_font,current_font_size))
 url = ''
 
 def new_file(event = None):
-	global url
-	url = ''
+	global url,text_change
+	try:
+		if text_change:
+			text_change = 0
+			mbox = messagebox.askyesno('warning','Do you want to save this file')
+			if mbox:
+				if url:
+					content = str(text_editor.get(1.0,tk.END))
+					with open(url , 'w', encoding='utf-8') as fw:
+						fw.write(content)
+				else:
+					url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
+					content2 = str(text_editor.get(1.0,tk.END))
+					url.write(content)
+					url.close()
+	except:
+		return
+	url=''
 	text_editor.delete(1.0,tk.END)
 
 def open_file(event = None):
-	global url
+	global url,text_change
 	url = filedialog.askopenfilename(initialdir = os.getcwd(), title='select file', filetypes = (('Text File','*.txt'),('All Files','*.*')))
 	try:
 		with open(url,'r') as fr:
@@ -330,26 +352,29 @@ def open_file(event = None):
 		return
 	except:
 		return
+	text_change = 0
 	main_application.title(os.path.basename(url))
 
 def save_file(event = None):
-	global url
+	global url,text_change
 	try:
+		text_change = 0
 		if url:
 			content = str(text_editor.get(1.0,tk.END))
 			with open(url , 'w', encoding='utf-8') as fw:
 				fw.write(content)
 		else:
 			url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
-			content = text_editor.get(1.0,tk.END)
+			content2 = str(text_editor.get(1.0,tk.END))
 			url.write(content)
 			url.close()
 	except:
 		return
 
 def save_file_as(event = None):
-	global url
+	global url,text_change
 	try:
+		text_change = 0
 		url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
 		content = text_editor.get(1.0,tk.END)
 		url.write(content)
@@ -357,40 +382,190 @@ def save_file_as(event = None):
 	except:
 		return
 
+def exit_func(event = None):
+	global url,text_change
+
+	try:
+		if text_change:
+			mbox = messagebox.askyesnocancel('warning','Do you want to save file ?')
+
+			if mbox is True:
+
+				if url:
+					content = str(text_editor.get(1.0,tk.END))
+					with open(url , 'w', encoding='utf-8') as fw:
+						fw.write(content)
+				else:
+					url = filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetypes=(('Text File','*.txt'),('All Files','*.*')))
+					content2 = str(text_editor.get(1.0,tk.END))
+					url.write(content)
+					url.close()
+
+			elif mbox is False:
+				main_application.destroy()
+		else:
+			main_application.destroy()
+	except:
+		return
+
+
+######### adding find functionality #################3
+
+def find_func(event = None):
+
+	def find():
+		word = find_input.get()
+		text_editor.tag_remove('match','1.0',tk.END)
+		matches = 0
+		if word:
+			start_pos = '1.0'
+			while True:
+				start_pos = text_editor.search(word,start_pos,stopindex=tk.END)
+				if not start_pos:
+					break
+				end_pos = f'{start_pos}+{len(word)}c'
+
+				text_editor.tag_add('match',start_pos,end_pos)
+				matches+=1
+				start_pos = end_pos
+				text_editor.tag_config('match',foreground = 'red',background = 'yellow')
+
+	def replace():
+		
+		word = find_input.get()
+		replace_text = replace_input.get()
+		content = text_editor.get(1.0,tk.END)
+		new_content = content.replace(word,replace_text)
+		text_editor.delete(1.0,tk.END)
+		text_editor.delete(1.0,tk.END)
+		text_editor.insert(1.0,new_content)
+
+	find_dialogue = tk.Toplevel()
+	find_dialogue.geometry('450x250+500+200')
+	find_dialogue.title('Find')
+	find_dialogue.resizable(0,0)
+
+	#frame
+
+	find_frame = ttk.LabelFrame(find_dialogue,text='Find/Replace')
+	find_frame.pack(pady = 20)
+
+	#labels
+	text_find_label = ttk.Label(find_frame,text='Find :')
+	text_replace_label = ttk.Label(find_frame , text = 'Replace :')
+
+	#entry
+	find_input = ttk.Entry(find_frame,width = 30)
+	replace_input = ttk.Entry(find_frame,width = 30)
+
+	#button
+	find_button = ttk.Button(find_frame,text='Find',command=find)
+	replace_button = ttk.Button(find_frame,text='Replace',command=replace)
+
+	#label grid
+	text_find_label.grid(row=0,column=0,padx=4,pady=4)
+	text_replace_label.grid(row=1,column=0,padx=4,pady=4)
+
+	#entry grid
+	find_input.grid(row=0,column=1,padx=4,pady=4)
+	replace_input.grid(row=1,column=1,padx=4,pady=4)
+
+	#button grid
+	find_button.grid(row=2,column=0,padx=8,pady=4)
+	replace_button.grid(row=2,column=1,padx=8,pady=4)
+
+	find_dialogue.mainloop()
+
 file.add_command(label = 'New', image = new_icon ,compound = tk.LEFT , accelerator = 'Ctrl+n' , command = new_file)
 file.add_command(label = 'Open', image = open_icon , compound = tk.LEFT , accelerator = 'Ctrl+o' , command = open_file)
 file.add_command(label = 'Save', image = save_icon , compound = tk.LEFT , accelerator = 'Ctrl+s' , command = save_file)
 file.add_command(label = 'Save_as', image = save_as_icon , compound = tk.LEFT , accelerator = 'Ctrl+ALT+s', command = save_file_as)
-file.add_command(label = 'Exit', image = exit_icon , compound = tk.LEFT , accelerator = 'Ctrl+q')
+file.add_command(label = 'Exit', image = exit_icon , compound = tk.LEFT , accelerator = 'Ctrl+q',command = exit_func)
 
 # to add drop down menu in edit section
 
-edit.add_command(label = 'Copy', image = copy_icon , compound = tk.LEFT , accelerator = 'Ctrl+c')
-edit.add_command(label = 'Cut', image = cut_icon , compound = tk.LEFT , accelerator = 'Ctrl+x')
-edit.add_command(label = 'Paste', image = paste_icon , compound = tk.LEFT , accelerator = 'Ctrl+v')
-edit.add_command(label = 'Clear all', image = clear_icon , compound = tk.LEFT , accelerator = 'Ctrl+ALT+s')
-edit.add_command(label = 'Find', image = find_icon , compound = tk.LEFT , accelerator = 'Ctrl+q')
+edit.add_command(label = 'Copy', image = copy_icon , compound = tk.LEFT , accelerator = 'Ctrl+c',command = lambda:text_editor.event_generate("<Control c>"))
+edit.add_command(label = 'Cut', image = cut_icon , compound = tk.LEFT , accelerator = 'Ctrl+x',command = lambda:text_editor.event_generate("<Control x>"))
+edit.add_command(label = 'Paste', image = paste_icon , compound = tk.LEFT , accelerator = 'Ctrl+v',command = lambda:text_editor.event_generate("<Control v>"))
+edit.add_command(label = 'Clear all', image = clear_icon , compound = tk.LEFT , accelerator = 'Ctrl+ALT+x',command = lambda:text_editor.event_generate("<Control Alt x>"))
+edit.add_command(label = 'Find', image = find_icon , compound = tk.LEFT , accelerator = 'Ctrl+q',command = find_func)
 
 # to add drop down menu in view section
 
-view.add_checkbutton(label = 'tool_bar', image = tool_bar_icon , compound = tk.LEFT , accelerator = 'Ctrl+c')
-view.add_checkbutton(label = 'status_bar', image = status_bar_icon , compound = tk.LEFT , accelerator = 'Ctrl+x')
+show_tool_bar = tk.BooleanVar()
+show_status_bar = tk.BooleanVar()
+
+show_tool_bar.set(True)
+show_status_bar.set(True)
+
+###### adding toolbar functionality ######
+
+def hide_tool_bar():
+
+	global show_tool_bar,show_status_bar
+	if show_tool_bar:
+		tool_bar.pack_forget()
+		show_tool_bar=False
+	else:
+		text_editor.pack_forget()
+		if show_status_bar:
+			status_bar.pack_forget()
+		tool_bar.pack(side=tk.TOP,fill=tk.X)
+		text_editor.pack(fill=tk.BOTH,expand=True)
+		if show_status_bar:
+			status_bar.pack(side=tk.BOTTOM)
+		show_tool_bar=True
+
+def hide_status_bar():
+
+	global show_status_bar
+
+	if show_status_bar:
+		status_bar.pack_forget()
+		show_status_bar=False
+	else:
+		status_bar.pack(side=tk.BOTTOM)
+		show_status_bar=True
+
+
+view.add_checkbutton(label = 'tool_bar',onvalue=1,offvalue=0,variable=show_tool_bar, image = tool_bar_icon , compound = tk.LEFT ,command = hide_tool_bar)
+view.add_checkbutton(label = 'status_bar',onvalue=1,offvalue=0,variable=show_status_bar, image = status_bar_icon , compound = tk.LEFT,command = hide_status_bar)
 
 theme_choice = tk.StringVar()
-color_icons = (light_icon,light_plus_icon,dark_icon,monokai_icon,night_blue_icon)
+color_icons = (light_icon,light_plus_icon,dark_icon,red_icon,monokai_icon,night_blue_icon)
+
+######## adding theme functionality ##########
+
+def change_theme():
+
+	chosen_theme = theme_choice.get()
+	color_tuple = color_dict.get(chosen_theme)
+
+	fg_color,bg_color = color_tuple[0],color_tuple[1]
+
+	text_editor.config(bg=bg_color , fg = fg_color)
 
 color_dict = {
 	
 	'light' : ('#000000' , '#ffffff'),
 	'light plus' : ('#474747' , '#e0e0e0'),
-	'dark' : ('#e4e4e4' , '#ffe8e8'),
-	'monokai' : ('#ededed' , '#6b9dc2'),
-	'night_blue' : ('#2d2d2d' , 'ffe8e8'),
+	'dark' : ('#e4e4e4' , '#2d2d2d'),
+	'red'  : ('#2d2d2d','#ffe8e8'),
+	'monokai' : ('#ffaeff' , '#474747'),
+	'night_blue' : ('#ededed' , '#6b9dc2'),
 }
 count = 0
 for key in color_dict:
-	theme.add_radiobutton(label = key, image = color_icons[count] , variable = theme_choice , compound = tk.LEFT)
+	theme.add_radiobutton(label = key, image = color_icons[count] , variable = theme_choice , compound = tk.LEFT , command = change_theme)
 	count+=1
+
+main_application.bind(("<Control-n>"),new_file)
+main_application.bind(("<Control-o>"),open_file)
+main_application.bind(("<Control-s>"),save_file)
+main_application.bind(("<Control-Alt-s>"),save_file_as)
+main_application.bind(("<Control-q>"),exit_func)
+main_application.bind(("<Control-f>"),find_func)
+
 
 #############################################            #################################################
 
