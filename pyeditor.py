@@ -33,43 +33,43 @@ main_menu.add_cascade(label = 'Theme', menu = theme)
 
 ############### file icon ##############
 
-new_icon_path = '/home/aman/Desktop/text editor/icons2/new.png'
-open_icon_path = '/home/aman/Desktop/text editor/icons2/open.png'
-save_icon_path = '/home/aman/Desktop/text editor/icons2/save.png'
-save_as_icon_path = '/home/aman/Desktop/text editor/icons2/save_as.png'
-exit_icon_path = '/home/aman/Desktop/text editor/icons2/exit.png'
+new_icon_path = 'new.png'
+open_icon_path = 'open.png'
+save_icon_path = 'save.png'
+save_as_icon_path = 'save_as.png'
+exit_icon_path = 'exit.png'
 
 ############### edit icon ##############
 
-copy_icon_path = '/home/aman/Desktop/text editor/icons2/copy.png'
-cut_icon_path = '/home/aman/Desktop/text editor/icons2/cut.png'
-paste_icon_path = '/home/aman/Desktop/text editor/icons2/paste.png'
-clear_icon_path = '/home/aman/Desktop/text editor/icons2/clear_all.png'
-find_icon_path = '/home/aman/Desktop/text editor/icons2/find.png'
+copy_icon_path = 'copy.png'
+cut_icon_path = 'cut.png'
+paste_icon_path = 'paste.png'
+clear_icon_path = 'clear_all.png'
+find_icon_path = 'find.png'
 
 ############### view icon ##############
 
-tool_bar_icon_path = '/home/aman/Desktop/text editor/icons2/tool_bar.png'
-status_bar_icon_path = '/home/aman/Desktop/text editor/icons2/status_bar.png'
+tool_bar_icon_path = 'tool_bar.png'
+status_bar_icon_path = 'status_bar.png'
 
 ############### theme icon ##############
 
-light_icon_path = '/home/aman/Desktop/text editor/icons2/light_default.png'
-light_plus_icon_path = '/home/aman/Desktop/text editor/icons2/light_plus.png'
-dark_icon_path = '/home/aman/Desktop/text editor/icons2/dark.png'
-monokai_icon_path = '/home/aman/Desktop/text editor/icons2/monokai.png'
-red_icon_path = '/home/aman/Desktop/text editor/icons2/red.png'
-night_blue_icon_path = '/home/aman/Desktop/text editor/icons2/night_blue.png'
+light_icon_path = 'light_default.png'
+light_plus_icon_path = 'light_plus.png'
+dark_icon_path = 'dark.png'
+monokai_icon_path = 'monokai.png'
+red_icon_path = 'red.png'
+night_blue_icon_path = 'night_blue.png'
 
 ############### button icon ##############
 
-bold_icon_path = '/home/aman/Desktop/text editor/icons2/bold.png'
-italic_icon_path = '/home/aman/Desktop/text editor/icons2/italic.png'
-underline_icon_path = '/home/aman/Desktop/text editor/icons2/underline.png'
-font_color_icon_path = '/home/aman/Desktop/text editor/icons2/font_color.png'
-left_align_icon_path = '/home/aman/Desktop/text editor/icons2/align_left.png'
-center_align_icon_path = '/home/aman/Desktop/text editor/icons2/align_center.png'
-right_align_icon_path = '/home/aman/Desktop/text editor/icons2/align_right.png'
+bold_icon_path = 'bold.png'
+italic_icon_path = 'italic.png'
+underline_icon_path = 'underline.png'
+font_color_icon_path = 'font_color.png'
+left_align_icon_path = 'align_left.png'
+center_align_icon_path = 'align_center.png'
+right_align_icon_path = 'align_right.png'
 
 ########################################## icon image ##################################################
 
